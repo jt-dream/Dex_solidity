@@ -108,6 +108,7 @@ constructor (address addrX, address addrY) ERC20test("LPToken","LPT"){
 function swap(uint256 tokenXAmount, uint256 tokenYAmount, uint256 tokenMinimumOutputAmount) external returns (uint256 outputAmount){
 // tokenXAmount / tokenYAmount 중 하나는 무조건 0이어야 합니다. 수량이 0인 토큰으로 스왑됨.
     require(tokenXAmount == 0 || tokenYAmount == 0 ,"token is only one side 0");
+    require(_amountX > 0 && _amountY > 0, "no token to swap");
     
 
     if(tokenYAmount == 0 ) {
@@ -132,26 +133,30 @@ function swap(uint256 tokenXAmount, uint256 tokenYAmount, uint256 tokenMinimumOu
 function addLiquidity(uint256 tokenXAmount, uint256 tokenYAmount, uint256 minimumLPTokenAmount) external virtual returns (uint256 LPTokenAmount){
         require(tokenXAmount > 0, "Less TokenA Supply");
         require(tokenYAmount > 0, "Less TokenB Supply");
-
-        uint256 totalsupply_ = ERC20test(address(this)).totalSupply();
-        uint liquidity;
+        require(tokenX.allowance(msg.sender, address(this)) >= tokenXAmount, "ERC20: insufficient allowance");
+        require(tokenY.allowance(msg.sender, address(this)) >= tokenYAmount, "ERC20: insufficient allowance");
+        require(tokenX.balanceOf(msg.sender) >= tokenXAmount, "ERC20: transfer amount exceeds balance");
+        require(tokenY.balanceOf(msg.sender) >= tokenYAmount, "ERC20: transfer amount exceeds balance");
+        _amountX = tokenX.balanceOf(address(this));
+        _amountY = tokenY.balanceOf(address(this));
+        uint256 totalsupply_ = totalSupply();
+        
         if (totalsupply_ == 0){
-            liquidity = sqrt(tokenXAmount*tokenYAmount);
+            LPTokenAmount = sqrt(tokenXAmount * tokenYAmount) ;
         }
         else{ 
-            uint256 amountX = tokenXAmount* totalsupply_ / tokenX.balanceOf(address(this));
-            uint256 amountY = tokenYAmount* totalsupply_ / tokenY.balanceOf(address(this));
-            liquidity = (amountX < amountY) ? amountX : amountY;
+            uint256 amountX = tokenXAmount * totalsupply_ / tokenX.balanceOf(address(this));
+            uint256 amountY = tokenYAmount * totalsupply_ / tokenY.balanceOf(address(this));
+            LPTokenAmount = (amountX < amountY) ? amountX : amountY;
     }
-     require(liquidity >= minimumLPTokenAmount, "Less LP Token Supply");
+     require(LPTokenAmount >= minimumLPTokenAmount, "Less LP Token Supply");
 
-    LPtoken._mint(msg.sender, liquidity);
+    _mint(msg.sender, LPTokenAmount);
     
     tokenX.transferFrom(msg.sender, address(this), tokenXAmount);
     tokenY.transferFrom(msg.sender, address(this), tokenYAmount);
     
-    return liquidity;
-
+    return LPTokenAmount;
 }
 function removeLiquidity(uint256 LPTokenAmount, uint256 minimumTokenXAmount, uint256 minimumTokenYAmount) external returns (uint tokenXAmount,uint tokenYAmount){
     require(LPTokenAmount > 0, "Less LP Token Supply");
