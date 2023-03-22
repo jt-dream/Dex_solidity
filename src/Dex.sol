@@ -77,15 +77,15 @@ function swap(uint256 tokenXAmount, uint256 tokenYAmount, uint256 tokenMinimumOu
     amountX = tokenX.balanceOf(address(this));// token X amount udpate
     amountY = tokenY.balanceOf(address(this));// token Y amount update
     uint OutAmount;
-    if(tokenYAmount == 0){
-        OutAmount =  _div(_mul(amountX,_div(999,1000))+amountX,_mul(amountY,_mul(amountX,_div(999,1000))));
+    if(tokenXAmount > 0){
+        OutAmount = (amountY *(tokenXAmount * 999 /1000)) / (amountX + (tokenXAmount * 999 / 1000));
     amountY -= OutAmount;
     amountX += tokenXAmount;
     tokenX.transferFrom(msg.sender,address(this),tokenYAmount);
     tokenX.transfer(msg.sender,OutAmount);
     }
     else{
-        OutAmount =  _div(_mul(amountY,_div(999,1000))+amountY,_mul(amountX,_mul(amountY,_div(999,1000))));
+        OutAmount =  amountX *(tokenYAmount * 999 /1000) / (amountY+ (tokenYAmount * 999 / 1000));
         amountX -= OutAmount;
         amountY += tokenYAmount;
         tokenY.transferFrom(msg.sender,address(this),tokenXAmount);
@@ -104,11 +104,7 @@ function _sqrt(uint x) public pure returns (uint y) {
         z = (x / z + z) / 2;
     }
 }
-function _div(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b > 0, "SafeMath: division by zero");
-        uint256 c = a / b;
-        return c;
-    }
+
 function _mul(uint256 a, uint256 b) internal pure returns (uint256) {
         if (a == 0) {
             return 0;
