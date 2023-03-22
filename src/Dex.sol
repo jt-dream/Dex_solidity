@@ -78,14 +78,14 @@ function swap(uint256 tokenXAmount, uint256 tokenYAmount, uint256 tokenMinimumOu
     amountY = tokenY.balanceOf(address(this));// token Y amount update
     uint OutAmount;
     if(tokenYAmount == 0){
-        OutAmount =  _div(_mul(amountX,_div(1000,999))+amountX,_mul(amountY,_mul(amountX,_div(1000,999))));
+        OutAmount =  _div(_mul(amountX,_div(999,1000))+amountX,_mul(amountY,_mul(amountX,_div(999,1000))));
     amountY -= OutAmount;
     amountX += tokenXAmount;
     tokenX.transferFrom(msg.sender,address(this),tokenYAmount);
     tokenX.transfer(msg.sender,OutAmount);
     }
     else{
-        OutAmount =  _div(_mul(amountY,_div(1000,999))+amountY,_mul(amountX,_mul(amountY,_div(1000,999))));
+        OutAmount =  _div(_mul(amountY,_div(999,1000))+amountY,_mul(amountX,_mul(amountY,_div(999,1000))));
         amountX -= OutAmount;
         amountY += tokenYAmount;
         tokenY.transferFrom(msg.sender,address(this),tokenXAmount);
