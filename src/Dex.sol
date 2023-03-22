@@ -76,23 +76,26 @@ function swap(uint256 tokenXAmount, uint256 tokenYAmount, uint256 tokenMinimumOu
     require(tokenXAmount == 0 || tokenYAmount == 0, "only one");
     amountX = tokenX.balanceOf(address(this));// token X amount udpate
     amountY = tokenY.balanceOf(address(this));// token Y amount update
-    uint OutAmount;
+    require(amountX > 0 && amountY >0,"no token");
+    uint256 outAmount;
     if(tokenXAmount > 0){
-        OutAmount = (amountY *(tokenXAmount * 999 /1000)) / (amountX + (tokenXAmount * 999 / 1000));
-    amountY -= OutAmount;
+        outAmount = amountY *(tokenXAmount * 999 /1000) / (amountX + (tokenXAmount * 999 / 1000));
+        require(outAmount >= tokenMinimumOutputAmount);
+    amountY -= outAmount;
     amountX += tokenXAmount;
-    tokenX.transferFrom(msg.sender,address(this),tokenYAmount);
-    tokenX.transfer(msg.sender,OutAmount);
+    tokenX.transferFrom(msg.sender,address(this),tokenXAmount);
+    tokenY.transfer(msg.sender,outAmount);
     }
     else{
-        OutAmount =  amountX *(tokenYAmount * 999 /1000) / (amountY+ (tokenYAmount * 999 / 1000));
-        amountX -= OutAmount;
+        outAmount =  amountX *(tokenYAmount * 999 /1000) / (amountY+ (tokenYAmount * 999 / 1000));
+        require(outAmount >= tokenMinimumOutputAmount);
+        amountX -= outAmount;
         amountY += tokenYAmount;
-        tokenY.transferFrom(msg.sender,address(this),tokenXAmount);
-        tokenY.transfer(msg.sender,OutAmount);
+        tokenY.transferFrom(msg.sender,address(this),tokenYAmount);
+        tokenX.transfer(msg.sender,outAmount);
 
     }
-    return OutAmount;
+    return outAmount;
 }
 
 
@@ -114,4 +117,3 @@ function _mul(uint256 a, uint256 b) internal pure returns (uint256) {
         return c;
     }
 }
-
